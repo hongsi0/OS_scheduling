@@ -30,7 +30,7 @@ void setProcess(Process *p, int id, int arrive_time, int burst_time, int deadlin
 
 typedef struct priority_queue {
     Process *Heap[MAX];
-    int size;
+    int size; // initialize to 0
 
 } Priority_Queue;
 
@@ -170,8 +170,6 @@ int main(void){
     setProcess(processes[1], 2, 4, 3, 10);
     setProcess(processes[0], 3, 5, 10, 20);
 
-    /* utilization 구하기 */
-
     /* processes 배열을 arrive_time 순으로 정렬하기(bubble sort)*/
     Process *tmp;
     for (i = 0; i < n - 1; i++){
@@ -189,7 +187,7 @@ int main(void){
         printf("%d ", processes[i]->arrive_time);
     }
     */
-
+    i = 0;
     while(1){
         /* 실행 중인 프로세스도 없고, ready queue가 비고,
         모든 프로세스의 도착시간이 지난 경우 while loop 종료 */
@@ -199,12 +197,13 @@ int main(void){
 
         while(i<n && processes[i]->arrive_time <= current_time) { // 여기서 index error 안나게 조건 추가해야함
             // 도착 시간이 같은 프로세스가 여러 개 있을 수 있어 if 대신 while 사용
+            //printf("TIME %5d\tID %3d\t ARRIVED\n", current_time, processes[i]->id); // to test
             if(isNowEmpty) { // 실행 중인 프로세스가 없을 경우 바로 실행
                 // 구조체 포인터 변수라서 안 값들까지 다 복사
                 now = processes[i];
                 p_start_time = current_time;
                 if(now->response_time == -1) {  // 첫 실행
-                    now->response_time = current_time;
+                    now->response_time = current_time - now->arrive_time;
                 }
                 isNowEmpty = false;
                 printf("TIME %5d\tID %3d\t START\n", current_time, now->id);
@@ -219,7 +218,7 @@ int main(void){
                 now = processes[i];
                 p_start_time = current_time;
                 if(now->response_time == -1) {  // 첫 실행
-                    now->response_time = current_time;
+                    now->response_time = current_time - now->arrive_time;
                 }
             } else {
                 push(processes[i]);
@@ -240,18 +239,41 @@ int main(void){
                 now = pop();
                 p_start_time = current_time;
                 if(now->response_time == -1) {  // 첫 실행
-                  now->response_time = current_time;
+                  now->response_time = current_time - now->arrive_time;
                 }
                 isNowEmpty = false;
                 printf("TIME %5d\tID %3d\t START\n", current_time, now->id);
                 // now 시작
-            } else {
+            } else if(i < n){ // 모든 프로세스가 끝났을 때 세어지는 것 방지
                 idle_time ++;
             }
         }
 
         current_time ++;
     }
+
+    /* utilization 구하기 */
+
+    /* response time, turnaround time, waiting time, idle time 검증 */
+    for (i = 0; i < n - 1; i++){
+        for(int j = 0; j < n - (i + 1); j++){
+            if(processes[j] -> id > processes[j+1] -> id){
+                tmp = processes[j];
+                processes[j] = processes[j+1];
+                processes[j+1] = tmp;
+            }
+        }
+    }
+    printf("\n");
+    for(i = 0; i < n; i++){
+        printf("PROCESS ID      : %3d\n", processes[i]->id);
+        printf("RESPONSE TIME   : %3d\n", processes[i]->response_time);
+        printf("TURNAROUND TIME : %3d\n", processes[i]->turnaround_time);
+        printf("WAITING TIME    : %3d\n", processes[i]->waiting_time);
+        printf("\n");
+    }
+    printf("IDLE TIME       : %3d\n", idle_time);
+    printf("FINISH TIME     : %3d\n", current_time - 1);
 
     /* free memory */
     for(i = 0; i < MAX; i++){
