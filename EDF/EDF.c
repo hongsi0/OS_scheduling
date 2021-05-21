@@ -16,7 +16,7 @@ typedef struct Process {
 
 } Process;
 
-Process setProcess(Process *p, int id, int arrive_time, int burst_time, int deadline){
+void setProcess(Process *p, int id, int arrive_time, int burst_time, int deadline){
     p->id = id;
     p->arrive_time = arrive_time;
     p->burst_time = burst_time;
@@ -30,30 +30,94 @@ Process setProcess(Process *p, int id, int arrive_time, int burst_time, int dead
 
 typedef struct priority_queue {
     Process *Heap[MAX];
-    int size = 0;
+    int size;
 
 } Priority_Queue;
 
-void push(Process *new);
-Process *pop(void);
-void swap(Process *a, Process *b);
-bool isReadyQueueEmpty(void);
-
 Priority_Queue ready_queue;
 
-void end(Process *now, current_time) {
+void swap(Process *a, Process *b){
+    Process tmp = *a;
+    *a = *b;
+    *b = tmp;
+}
+
+void push(Process *new){
+    if(ready_queue.size+1 > MAX){
+        return;
+    }
+
+    ready_queue.Heap[ready_queue.size] = new;
+
+    int current = ready_queue.size;
+    int parent = (current - 1) / 2;
+
+    while(current > 0 && ready_queue.Heap[current]->deadline < ready_queue.Heap[parent]->deadline){
+        swap(ready_queue.Heap[current], ready_queue.Heap[parent]);
+        current = parent;
+        parent = (current - 1) / 2;
+    }
+
+    ready_queue.size ++;
+}
+
+Process *pop(void){
+    if(ready_queue.size <= 0){
+        return NULL;
+    }
+    Process *root = ready_queue.Heap[0];
+
+    ready_queue.size --;
+
+    ready_queue.Heap[0] = ready_queue.Heap[ready_queue.size];
+
+    int current = 0;
+    int leftChild = current * 2 + 1;
+    int rightChild = current * 2 + 2;
+    int minNode = current;
+
+    while(leftChild < ready_queue.size){
+        if(ready_queue.Heap[minNode]->deadline > ready_queue.Heap[leftChild]->deadline){
+            minNode = leftChild;
+        }
+        if(rightChild < ready_queue.size && ready_queue.Heap[minNode]->deadline > ready_queue.Heap[rightChild]->deadline){
+            minNode = rightChild;
+        }
+
+        if(minNode == current){
+            break;
+        } else {
+            swap(ready_queue.Heap[current], ready_queue.Heap[minNode]);
+
+            current = minNode;
+            leftChild = current * 2 + 1;
+            rightChild = current * 2 + 2;
+        }
+    }
+
+    return root;
+}
+
+bool isReadyQueueEmpty(void){
+    if(ready_queue.size == 0){
+        return true;
+    }
+    return false;
+}
+
+void end(Process *now, int current_time) {
     if(current_time <= now->deadline){
         now->deadline_satisfied = true;
     }
     now->turnaround_time = current_time - now->arrive_time;
     now->waiting_time = now->turnaround_time - now->burst_time;
 }
-
+/*
 int input_data(Process *processes){
     FILE *fd = fopen("input.txt", "r");
     char data[255];
     char *pdata;
-    int i = 0;
+    int i = 1;
     int arrive_time, burst_time, deadline;
 
     while (!feof(fd)) {
@@ -72,9 +136,9 @@ int input_data(Process *processes){
 
     fclose(fd);
 
-    return i; // i개의 프로세스 (index : 0 ~ i-1)
+    return i-1; // i개의 프로세스 (id : 1 ~ i)
 }
-
+*/
 int main(void){
     int i=0;
     int n;                    // 전체 프로세스 개수
@@ -86,9 +150,11 @@ int main(void){
     int idle_time = 0;        // 유휴 시간
     bool isNowEmpty = true;   // 현재 실행중인 프로세스가 있는지 확인
 
+    ready_queue.size = 0;
     for (i = 0; i < MAX; i++)
     {
         processes[i] = malloc(sizeof(Process));
+        ready_queue.Heap[i] = malloc(sizeof(Process));
     }
 
     /* 텍스트파일 읽기 */
@@ -100,9 +166,9 @@ int main(void){
 
     // to test
     n = 3;
-    setProcess(processes[2], 0, 0, 8, 25);
-    setProcess(processes[1], 1, 4, 3, 10);
-    setProcess(processes[0], 2, 5, 10, 20);
+    setProcess(processes[2], 1, 0, 8, 25);
+    setProcess(processes[1], 2, 4, 3, 10);
+    setProcess(processes[0], 3, 5, 10, 20);
 
     /* utilization 구하기 */
 
@@ -141,14 +207,15 @@ int main(void){
                     now->response_time = current_time;
                 }
                 isNowEmpty = false;
-                // print something
+                printf("TIME %5d\tID %3d\t START\n", current_time, now->id);
                 // now 시작
             } else if(processes[i]->deadline < now->deadline) { /* 선점 */
                 now->burst_time = now->burst_time - (current_time - p_start_time);
                 push(now);
-                // print something
+                printf("TIME %5d\tID %3d\t FINISH\n", current_time, now->id);
+                printf("TIME %5d\tID %3d\t START\n", current_time, processes[i]->id);
                 // now 종료, processes[i] 시작
-                end(&now, current_time);
+                end(now, current_time);
                 now = processes[i];
                 p_start_time = current_time;
                 if(now->response_time == -1) {  // 첫 실행
@@ -162,9 +229,9 @@ int main(void){
 
         if(!isNowEmpty && now->burst_time <= current_time - p_start_time){ // now 프로세스가 끝남
             isNowEmpty = true;
-            // print something
+            printf("TIME %5d\tID %3d\t FINISH\n", current_time, now->id);
             // now 종료
-            end(&now, current_time);
+            end(now, current_time);
         }
 
         if(isNowEmpty){
@@ -176,7 +243,7 @@ int main(void){
                   now->response_time = current_time;
                 }
                 isNowEmpty = false;
-                // print something
+                printf("TIME %5d\tID %3d\t START\n", current_time, now->id);
                 // now 시작
             } else {
                 idle_time ++;
