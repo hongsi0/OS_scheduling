@@ -76,17 +76,36 @@ int main(void){
     /* 텍스트파일 읽기 */
     // 텍스트 파일 읽어 구조체 포인터에 저장
     // 각 구조체 포인터에 대해 메모리 할당
+    for (i = 0; i < sizeof(processes) / sizeof(struct Process *); i++){
+        processes[i] = malloc(sizeof(struct Process));
+    }
     // 이를 구조체 포인터 배열 processes에 저장
     // n 구하기
     n = input_data(processes);
 
     /* utilization 구하기 */
 
-    /* processes 배열을 arrive_time 순으로 정렬하기 */
+    /* processes 배열을 arrive_time 순으로 정렬하기(bubble sort)*/
     // sort(processes, arrive_time);
     // 이건 heap이 아니라 정말 배열을 구조체 변수에 따라 정렬하는 것이기 때문에
     // push, pop에서 사용하는 정렬 함수와 다른 정렬을 사용해야한다.
     // 이때 한번 사용하기 때문에 굳이 함수로 만들지 않아도 되지만 만들면 예쁠것..
+    Process *tmp;
+    for (i = 0; i < sizeof(processes) / sizeof(struct Process *) - 1; i++){ 
+        for(int j = 0; j < sizeof(processes) / sizeof(struct Process *) - (i + 1); j++){
+            if(processes[j] -> arrive_time > processes[j+1] -> arrive_time){
+                tmp = processes[j];
+                processes[j] = processes[j+1];
+                processes[j+1] = tmp;
+            }
+        }
+    }
+    /*
+    printf("process_arrive_time:");
+    for(i = 0; i < sizeof(processes)/ sizeof(struct Process *); i++){
+        printf("%d ", processes[i]->arrive_time);
+    }
+    */
 
     while(1){
         /* 실행 중인 프로세스도 없고, ready queue가 비고,
@@ -95,7 +114,7 @@ int main(void){
             break;
         }
 
-        while(i<n && processes[i].arrive_time <= current_time) { // 여기서 index error 안나게 조건 추가해야함
+        while(i<n && processes[i]->arrive_time <= current_time) { // 여기서 index error 안나게 조건 추가해야함
             // 도착 시간이 같은 프로세스가 여러 개 있을 수 있어 if 대신 while 사용
             if(isNowEmpty) { // 실행 중인 프로세스가 없을 경우 바로 실행
                 // 구조체 포인터 변수라서 안 값들까지 다 복사
