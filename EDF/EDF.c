@@ -160,6 +160,7 @@ int main(void){
     double utilization;       // CPU 점유율
     int idle_time = 0;        // 유휴 시간
     bool isNowEmpty = true;   // 현재 실행중인 프로세스가 있는지 확인
+    FILE *fp = fopen("result.txt", "w"); //for gantt chart
 
     ready_queue.size = 0;
     for (i = 0; i < MAX; i++)
@@ -174,6 +175,7 @@ int main(void){
     // 이를 구조체 포인터 배열 processes에 저장
     // n 구하기
     n = input_data(processes);
+    fprintf(fp, "%d\n", n);
 
     /* processes 배열을 arrive_time 순으로 정렬하기(bubble sort)*/
     Process *tmp;
@@ -212,12 +214,15 @@ int main(void){
                 }
                 isNowEmpty = false;
                 printf("TIME %5d\tID %3d\t START\n", current_time, now->id);
+                fprintf(fp, "%d %d ", now->id, current_time);
                 // now 시작
             } else if(processes[i]->deadline < now->deadline) { /* 선점 */
                 now->remain_time = now->remain_time - (current_time - p_start_time);
                 push(now);
                 printf("TIME %5d\tID %3d\t FINISH\n", current_time, now->id);
+                fprintf(fp, "%d\n", current_time);
                 printf("TIME %5d\tID %3d\t START\n", current_time, processes[i]->id);
+                fprintf(fp, "%d %d ", processes[i]->id, current_time);
                 // now 종료, processes[i] 시작
                 end(now, current_time);
                 now = processes[i];
@@ -234,6 +239,7 @@ int main(void){
         if(!isNowEmpty && now->remain_time <= current_time - p_start_time){ // now 프로세스가 끝남
             isNowEmpty = true;
             printf("TIME %5d\tID %3d\t FINISH\n", current_time, now->id);
+            fprintf(fp, "%d\n", current_time);
             // now 종료
             end(now, current_time);
         }
@@ -248,6 +254,7 @@ int main(void){
                 }
                 isNowEmpty = false;
                 printf("TIME %5d\tID %3d\t START\n", current_time, now->id);
+                fprintf(fp, "%d %d ", now->id, current_time);
                 // now 시작
             } else if(i < n){ // 모든 프로세스가 끝났을 때 세어지는 것 방지
                 idle_time ++;
