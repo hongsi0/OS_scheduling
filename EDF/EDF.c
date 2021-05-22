@@ -9,6 +9,7 @@ typedef struct Process {
     int arrive_time;
     int burst_time;
     int deadline;
+    int remain_time;         //남은 burst time
 
     int response_time;       // 응답 시간
     int turnaround_time;     // 소요 시간
@@ -22,6 +23,7 @@ void setProcess(Process *p, int id, int arrive_time, int burst_time, int deadlin
     p->arrive_time = arrive_time;
     p->burst_time = burst_time;
     p->deadline = deadline;
+    p->remain_time = burst_time;
 
     p->response_time = -1;
     p->turnaround_time = -1;
@@ -113,6 +115,7 @@ void end(Process *now, int current_time) {
     now->turnaround_time = current_time - now->arrive_time;
     now->waiting_time = now->turnaround_time - now->burst_time;
 }
+
 int input_data(Process *p[]){
     FILE *fd = fopen("input.txt", "r");
     char data[255];
@@ -146,6 +149,7 @@ int input_data(Process *p[]){
 
     return i-1; // i개의 프로세스 (id : 1 ~ i)
 }
+
 int main(void){
     int i=0;
     int n;                    // 전체 프로세스 개수
@@ -210,7 +214,7 @@ int main(void){
                 printf("TIME %5d\tID %3d\t START\n", current_time, now->id);
                 // now 시작
             } else if(processes[i]->deadline < now->deadline) { /* 선점 */
-                now->burst_time = now->burst_time - (current_time - p_start_time);
+                now->remain_time = now->burst_time - (current_time - p_start_time);
                 push(now);
                 printf("TIME %5d\tID %3d\t FINISH\n", current_time, now->id);
                 printf("TIME %5d\tID %3d\t START\n", current_time, processes[i]->id);
@@ -227,7 +231,7 @@ int main(void){
             i++;
         }
 
-        if(!isNowEmpty && now->burst_time <= current_time - p_start_time){ // now 프로세스가 끝남
+        if(!isNowEmpty && now->remain_time <= current_time - p_start_time){ // now 프로세스가 끝남
             isNowEmpty = true;
             printf("TIME %5d\tID %3d\t FINISH\n", current_time, now->id);
             // now 종료
@@ -253,7 +257,10 @@ int main(void){
         current_time ++;
     }
 
+    printf("\n");
     /* utilization 구하기 */
+    utilization = (1- (idle_time/(current_time-1))) * 100; //CPU utilization(%) 계산
+    printf("UTILIZATION     : %lf\n", utilization);
 
     /* response time, turnaround time, waiting time, idle time 검증 */
     for (i = 0; i < n - 1; i++){
