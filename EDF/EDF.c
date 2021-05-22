@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h> // bool
 #include <stdlib.h>  // malloc, free
+#include <string.h> // strtok
 #define MAX 10       // to test, should be 100
 
 typedef struct Process {
@@ -112,8 +113,7 @@ void end(Process *now, int current_time) {
     now->turnaround_time = current_time - now->arrive_time;
     now->waiting_time = now->turnaround_time - now->burst_time;
 }
-/*
-int input_data(Process *processes){
+int input_data(Process *p[]){
     FILE *fd = fopen("input.txt", "r");
     char data[255];
     char *pdata;
@@ -123,14 +123,22 @@ int input_data(Process *processes){
     while (!feof(fd)) {
         fgets(data, sizeof(data), fd);
         pdata = strtok(data, " ");
-        arrive_time = atoi(pdata);
-        pdata = strtok(data, " ");
-        burst_time = atoi(pdata);
-        pdata = strtok(data, " ");
-        deadline = atoi(pdata);
-        pdata = strtok(data, " ");
-
-        setProcess(processes[i], i, arrive_time, burst_time, deadline);
+        for(int j = 0; j <3; j++){
+            if(j == 0){
+                arrive_time = atoi(pdata);
+                //printf("arrival_time: %d    ", arrive_time);
+            }
+            else if(j == 1){
+                burst_time = atoi(pdata);
+                //printf("burst_time: %d    ", burst_time);
+            }
+            else{
+                deadline = atoi(pdata);
+                //printf("deadline: %d\n", deadline);
+            }
+            pdata = strtok(NULL, " ");
+        }
+        setProcess(p[i-1], i, arrive_time, burst_time, deadline);
         i++;
     }
 
@@ -138,7 +146,6 @@ int input_data(Process *processes){
 
     return i-1; // i개의 프로세스 (id : 1 ~ i)
 }
-*/
 int main(void){
     int i=0;
     int n;                    // 전체 프로세스 개수
@@ -162,13 +169,7 @@ int main(void){
     // 각 구조체 포인터에 대해 메모리 할당
     // 이를 구조체 포인터 배열 processes에 저장
     // n 구하기
-    // n = input_data(processes);
-
-    // to test
-    n = 3;
-    setProcess(processes[2], 1, 0, 8, 25);
-    setProcess(processes[1], 2, 4, 3, 10);
-    setProcess(processes[0], 3, 5, 10, 20);
+    n = input_data(processes);
 
     /* processes 배열을 arrive_time 순으로 정렬하기(bubble sort)*/
     Process *tmp;
