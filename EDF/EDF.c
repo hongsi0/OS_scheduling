@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdbool.h> // bool
 #include <stdlib.h>  // malloc, free
-#include <string.h> // strtok
+#include <string.h>  // strtok
 #define MAX 10       // to test, should be 100
 
 typedef struct Process {
-    int id; // -1            // 프로세스 id
+    int id;                  // 프로세스 id
     int arrive_time;
     int burst_time;
     int deadline;
@@ -214,7 +214,7 @@ int main(void){
                 printf("TIME %5d\tID %3d\t START\n", current_time, now->id);
                 // now 시작
             } else if(processes[i]->deadline < now->deadline) { /* 선점 */
-                now->remain_time = now->burst_time - (current_time - p_start_time);
+                now->remain_time = now->remain_time - (current_time - p_start_time);
                 push(now);
                 printf("TIME %5d\tID %3d\t FINISH\n", current_time, now->id);
                 printf("TIME %5d\tID %3d\t START\n", current_time, processes[i]->id);
