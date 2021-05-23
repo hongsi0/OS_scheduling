@@ -106,8 +106,10 @@ void print_gatt(int *gantt_information){
 int main(){
     struct _process process[MAX_PROCESS];
     int gantt_info[total_run_time][2];
+    FILE *fp = fopen("result.txt", "w"); // for gantt chart
 
     input_data(process);
+    fprintf(fp, "%d\n", proc_num); // write proc_num to result.txt
 
     sort(process, proc_num);
 
@@ -126,14 +128,18 @@ int main(){
         check_procstart(process);
 
         if(process[0].remain_time > 0 && process[0].remain_time <= tq){
+            fprintf(fp, "%d %d ", process[0].process_id, start_time); // write pid, start time
             proc_burst_end(process);
+            fprintf(fp, "%d\n", start_time); // write process return time
 
             dupli_procn = dupli_procn - 1;
 
             // printf("case 1 %d Remain time: %d tq : %d\n", process[index].process_id, process[index].remain_time, tq);
         }
         else if(process[0].remain_time > 0 && process[0].remain_time > tq){
+            fprintf(fp, "%d %d ", process[0].process_id, start_time); // write pid, start time
             proc_burst_remain(process);
+            fprintf(fp, "%d\n", start_time); // write process return time
 
             // printf("case 2 %d Remain time: %d tq : %d\n", process[index].process_id, process[index].remain_time, tq);
         }
