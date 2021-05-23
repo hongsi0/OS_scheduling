@@ -297,7 +297,7 @@ int main(void){
     aver_waiting /= n;
 
     printf("\n");
-    printf("TOTAL %3d PROCESSES\n", n);
+    printf("TOTAL %d PROCESSES\n", n);
     printf("IDLE TIME              : %d\n", idle_time);
     printf("TOTAL RUNTIME          : %d\n", current_time - 1);
     printf("AVERAGE WAITING TIME   : %.3f\n", aver_waiting);
