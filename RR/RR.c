@@ -42,7 +42,7 @@ void sort(struct _process *proc, int total_proc) {
 }
 
 void input_data(struct _process *proc){
-    FILE *fd = fopen("test.txt", "r");
+    FILE *fd = fopen("process.txt", "r");
     char data[255];
     char *pdata;
     int i = 0;

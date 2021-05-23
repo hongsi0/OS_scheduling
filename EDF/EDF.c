@@ -117,7 +117,7 @@ void end(Process *now, int current_time) {
 }
 
 int input_data(Process *p[]){
-    FILE *fd = fopen("input.txt", "r");
+    FILE *fd = fopen("process.txt", "r");
     char data[255];
     char *pdata;
     int i = 1;
