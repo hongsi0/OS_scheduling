@@ -11,8 +11,8 @@
 
 int proc_num;
 int start_time = 0;
-int context_switch = 0, prev_proc=-1;
-int tq = 2; // 타임 퀀텀
+int context_switch = 0;
+int prev_proc=-1;
 int total_run_time = 0;
 
 
@@ -41,7 +41,7 @@ void sort(struct _process *proc, int total_proc) {
     return;
 }
 
-void input_data(struct _process *proc){
+int input_data(struct _process *proc){
     FILE *fd = fopen("process.txt", "r");
     char data[255];
     char *pdata;
@@ -70,7 +70,7 @@ void input_data(struct _process *proc){
     }
     fclose(fd);
 
-    proc_num = i;
+    return i;
 }
 
 void contswitch_count(struct _process *proc){
@@ -85,7 +85,14 @@ void check_procstart(struct _process *proc){
     }
 }
 
+void cal_response_time(struct _process *proc){
+    if(proc[0].burst_time == proc[0].remain_time){
+        proc[0].response_time = start_time-proc[0].r_at;
+    }
+}
+
 void proc_burst_end(struct _process *proc){
+    cal_response_time(proc);
     start_time = start_time + proc[0].remain_time;
     proc[0].remain_time = 0;
     proc[0].turnaround_time = start_time - proc[0].r_at;
@@ -94,71 +101,75 @@ void proc_burst_end(struct _process *proc){
 }
 
 void proc_burst_remain(struct _process *proc){
-    proc[0].remain_time = proc[0].remain_time - tq;
-    start_time = start_time + tq;
+    cal_response_time(proc);
+    proc[0].remain_time = proc[0].remain_time - TQ;
+    start_time = start_time + TQ;
     proc[0].arrival_time = start_time+0.00000001;
 }
 
-void print_gatt(int *gantt_information){
+void print_result(struct _process *proc){
+    int total_wt = 0;
+    int total_tat = 0;
+    int total_rpt = 0;
 
+    for(int i=0; i < proc_num; i++){
+        total_wt = total_wt + proc[i].waiting_time;
+        total_tat = total_tat + proc[i].turnaround_time;
+        total_rpt = total_rpt + proc[i].response_time;
+
+        if(i==0){
+            printf("\n\n-------------------------------------------------------------------------------\n");
+        }
+        printf("process_id: %d  |  ", proc[i].process_id);
+        printf("waiting time: %d  |  ", proc[i].waiting_time);
+        printf("turnaround time: %d  |  ", proc[i].turnaround_time);
+        printf("response time: %d\n", proc[i].response_time);
+        if(i==proc_num-1){
+            printf("-------------------------------------------------------------------------------\n");
+        }
+    }
+    printf("Total Context Switch : %d\n", context_switch);
+    printf("Total Runtime : %d\n", start_time);
+    printf("Average Waiting Time : %d\n", total_wt/proc_num);
+    printf("Average Turnaround Time : %d\n", total_tat/proc_num);
+    printf("Average Response Time : %d\n\n", total_rpt/proc_num);
 }
 
 int main(){
     struct _process process[MAX_PROCESS];
-    int gantt_info[total_run_time][2];
     FILE *fp = fopen("result.txt", "w"); // for gantt chart
 
-    input_data(process);
+    proc_num = input_data(process);
     fprintf(fp, "%d\n", proc_num); // write proc_num to result.txt
 
     sort(process, proc_num);
 
-    // 정렬 확인
-    // for(int i=0; i < len; i++){
-    //     printf("process_id: %d    ", process[i].process_id);
-    //     printf("arrival_time: %d    ", process[i].arrival_time);
-    //     printf("burst_time: %d\n", process[i].burst_time);
-    // }
-
-    int gantt_index = 0; // process index
     int dupli_procn = proc_num; // while 조건에 들어갈 process 갯수
     
     while(dupli_procn!=0){
         contswitch_count(process);
         check_procstart(process);
 
-        if(process[0].remain_time > 0 && process[0].remain_time <= tq){
+        if(process[0].remain_time > 0 && process[0].remain_time <= TQ){
             fprintf(fp, "%d %d ", process[0].process_id, start_time); // write pid, start time
             proc_burst_end(process);
             fprintf(fp, "%d\n", start_time); // write process return time
 
             dupli_procn = dupli_procn - 1;
-
-            // printf("case 1 %d Remain time: %d tq : %d\n", process[index].process_id, process[index].remain_time, tq);
         }
-        else if(process[0].remain_time > 0 && process[0].remain_time > tq){
+        else if(process[0].remain_time > 0 && process[0].remain_time > TQ){
             fprintf(fp, "%d %d ", process[0].process_id, start_time); // write pid, start time
             proc_burst_remain(process);
             fprintf(fp, "%d\n", start_time); // write process return time
-
-            // printf("case 2 %d Remain time: %d tq : %d\n", process[index].process_id, process[index].remain_time, tq);
         }
 
-        gantt_index++;
         prev_proc = process[0].process_id;
         sort(process, proc_num);
-
-        printf("%d\n", start_time);
     }
-    
-    printf("total context switch : %d\n", context_switch);
-    printf("final total runtime : %d\n\n", start_time);
 
-    for(int i=0; i < proc_num; i++){
-        printf("process_id: %d    ", process[i].process_id);
-        printf("waiting time: %d    ", process[i].waiting_time);
-        printf("turnaround time: %d\n", process[i].turnaround_time);
-    }
+    fclose(fp);
+
+    print_result(process);
 
     return 0;
 }
