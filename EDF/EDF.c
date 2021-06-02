@@ -19,6 +19,7 @@ typedef struct Process {
 } Process;
 
 void setProcess(Process *p, int id, int arrive_time, int burst_time, int deadline){
+    // 프로세스 구조체를 초기화하는 함수
     p->id = id;
     p->arrive_time = arrive_time;
     p->burst_time = burst_time;
@@ -32,20 +33,25 @@ void setProcess(Process *p, int id, int arrive_time, int burst_time, int deadlin
 }
 
 typedef struct priority_queue {
+    // 우선순위 큐를 힙을 이용해 구현; 힙은 배열 형태
     Process *Heap[MAX];
+    // 힙의 원소 하나는 프로세스 구조체 포인터임
+    // main 함수의 프로세스 저장소가 구조체 포인터 배열이기 때문에 공유하기 위함
     int size; // initialize to 0
 
 } Priority_Queue;
 
-Priority_Queue ready_queue;
+Priority_Queue ready_queue; // 레디 큐(우선순위 큐) 선언
 
 void swap(Process *a, Process *b){
     Process tmp = *a;
     *a = *b;
     *b = tmp;
+    // 프로세스 배열 내에서 원소 2개의 위치를 서로 바꾸는 함수
 }
 
 void push(Process *new){
+    // 우선순위 큐에 새로운 원소를 집어넣고, 정렬하는 함수
     if(ready_queue.size+1 > MAX){
         return;
     }
@@ -65,6 +71,7 @@ void push(Process *new){
 }
 
 Process *pop(void){
+    // 우선순위 큐의 root원소를 return하고, 정렬하는 함수
     if(ready_queue.size <= 0){
         return NULL;
     }
@@ -102,6 +109,7 @@ Process *pop(void){
 }
 
 bool isReadyQueueEmpty(void){
+    // 우선순위 큐(ready queue)가 비었는지 확인하는 함수
     if(ready_queue.size == 0){
         return true;
     }
@@ -109,6 +117,9 @@ bool isReadyQueueEmpty(void){
 }
 
 void end(Process *now, int current_time) {
+    // 프로세스가 종료될 경우 처리를 담당하는 함수
+    // 프로세스가 종료될 경우, 종료된 시간을 인자로 받아
+    // deadline 만족여부, turnaround time, waiting time 계산
     if(current_time <= now->deadline){
         now->deadline_satisfied = true;
     }
@@ -117,6 +128,7 @@ void end(Process *now, int current_time) {
 }
 
 int input_data(Process *p[]){
+    // 텍스트 파일을 읽어 main의 프로세스 구조체 포인터 배열에 저장하는 함수
     FILE *fd = fopen("process.txt", "r");
     char data[255];
     char *pdata;
@@ -270,6 +282,7 @@ int main(void){
     printf("UTILIZATION(%%)  : %.3lf\n", utilization);
 
     /* response time, turnaround time, waiting time, idle time 검증 */
+    // process id 순으로 정렬 
     for (i = 0; i < n - 1; i++){
         for(int j = 0; j < n - (i + 1); j++){
             if(processes[j] -> id > processes[j+1] -> id){
