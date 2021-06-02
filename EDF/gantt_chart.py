@@ -26,6 +26,12 @@ def scheduling_plot(result):
     # 프로세스 개수 num 변수에 저장
     num = data[0].split()
     num = int(num[0])
+    
+    # 랜덤 색상 팔레트 생성
+    colors = ['#000000']
+    r = lambda: np.random.randint(0,255)
+    for i in range(1, num+1):
+        colors.append('#%02X%02X%02X' % (r(),r(),r()))
 
     # 프로세스 개수 data 배열에서 삭제
     del data[0]
@@ -74,7 +80,7 @@ def scheduling_plot(result):
         for j in range(1, num + 1) :
             if ((int(data[0]) == j)):
                 execute_time = int(data[2]) - int(data[1])
-                gantt.broken_barh([(int(data[1]), execute_time)], (bar_bottom(j), (PROC_HEIGHT)), color ='black')
+                gantt.broken_barh([(int(data[1]), execute_time)], (bar_bottom(j), (PROC_HEIGHT)), color=colors[j])
 
     # 공백 줄이기
     plt.tight_layout()
