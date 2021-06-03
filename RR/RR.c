@@ -10,7 +10,7 @@
 #define TQ 2
 
 int proc_num;
-int start_time = 0;
+int curr_time = 0;
 int context_switch = 0;
 int prev_proc=-1;
 int total_run_time = 0;
@@ -74,28 +74,28 @@ int input_data(struct _process *proc){
 }
 
 void contswitch_count(struct _process *proc){
-    if(start_time > 0 && prev_proc != proc[0].process_id){
+    if(curr_time > 0 && prev_proc != proc[0].process_id){
         context_switch++;
     }
 }
 
 void check_procstart(struct _process *proc){
-    if(proc[0].arrival_time > start_time){
-        start_time = start_time + proc[0].r_at;
+    if(proc[0].arrival_time > curr_time){
+        curr_time = curr_time + proc[0].r_at;
     }
 }
 
 void cal_response_time(struct _process *proc){
     if(proc[0].burst_time == proc[0].remain_time){
-        proc[0].response_time = start_time-proc[0].r_at;
+        proc[0].response_time = curr_time-proc[0].r_at;
     }
 }
 
 void proc_burst_end(struct _process *proc){
     cal_response_time(proc);
-    start_time = start_time + proc[0].remain_time;
+    curr_time = curr_time + proc[0].remain_time;
     proc[0].remain_time = 0;
-    proc[0].turnaround_time = start_time - proc[0].r_at;
+    proc[0].turnaround_time = curr_time - proc[0].r_at;
     proc[0].waiting_time = proc[0].turnaround_time - proc[0].burst_time;
     proc[0].arrival_time = 100000000;
 }
@@ -103,8 +103,8 @@ void proc_burst_end(struct _process *proc){
 void proc_burst_remain(struct _process *proc){
     cal_response_time(proc);
     proc[0].remain_time = proc[0].remain_time - TQ;
-    start_time = start_time + TQ;
-    proc[0].arrival_time = start_time+0.00000001;
+    curr_time = curr_time + TQ;
+    proc[0].arrival_time = curr_time+0.00000001;
 }
 
 void print_result(struct _process *proc){
@@ -116,6 +116,7 @@ void print_result(struct _process *proc){
         total_wt = total_wt + proc[i].waiting_time;
         total_tat = total_tat + proc[i].turnaround_time;
         total_rpt = total_rpt + proc[i].response_time;
+        // double utilization = (1- (idle_time/(current_time-1))) * 100;
 
         if(i==0){
             printf("\n\
@@ -133,9 +134,9 @@ void print_result(struct _process *proc){
     }
     printf("Total %d Processes\n", proc_num);
     //printf("Total Context Switch : %d\n", context_switch);
-    printf("Total Runtime          : %d\n", start_time);
-    // Utilization
-    // Idle Time
+    printf("Total Runtime          : %d\n", curr_time);
+    // printf("Utilization            : %.3lf%%\n", utilization);
+    // printf("Idle Time              : %d\n", idle_time);
     printf("Average Waiting Time   : %.3f\n", total_wt/proc_num);
     printf("Average Turnaround Time: %.3f\n", total_tat/proc_num);
     printf("Average Response Time  : %.3f\n\n", total_rpt/proc_num);
@@ -157,16 +158,16 @@ int main(){
         check_procstart(process);
 
         if(process[0].remain_time > 0 && process[0].remain_time <= TQ){
-            fprintf(fp, "%d %d ", process[0].process_id, start_time); // write pid, start time
+            fprintf(fp, "%d %d ", process[0].process_id, curr_time); // write pid, start time
             proc_burst_end(process);
-            fprintf(fp, "%d\n", start_time); // write process return time
+            fprintf(fp, "%d\n", curr_time); // write process return time
 
             dupli_procn = dupli_procn - 1;
         }
         else if(process[0].remain_time > 0 && process[0].remain_time > TQ){
-            fprintf(fp, "%d %d ", process[0].process_id, start_time); // write pid, start time
+            fprintf(fp, "%d %d ", process[0].process_id, curr_time); // write pid, start time
             proc_burst_remain(process);
-            fprintf(fp, "%d\n", start_time); // write process return time
+            fprintf(fp, "%d\n", curr_time); // write process return time
         }
 
         prev_proc = process[0].process_id;
