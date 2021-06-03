@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from bokeh.palettes import Turbo256, turbo
 
 # 바 크기 지정
 PROC_HEIGHT = 15
@@ -78,7 +79,7 @@ def scheduling_plot(result):
     for i in data:
         data = i.split()
         execute_time = int(data[2]) - int(data[1])
-        gantt.broken_barh([(int(data[1]), execute_time)], (bar_bottom(int(data[0])), (PROC_HEIGHT)), color=colors[int(data[0])])
+        gantt.broken_barh([(int(data[1]), execute_time)], (bar_bottom(int(data[0])), (PROC_HEIGHT)), color=turbo(num+1)[int(data[0])])
         
     # 공백 줄이기
     plt.tight_layout()
