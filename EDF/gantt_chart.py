@@ -79,7 +79,7 @@ def scheduling_plot(result):
     for i in data:
         data = i.split()
         execute_time = int(data[2]) - int(data[1])
-        gantt.broken_barh([(int(data[1]), execute_time)], (bar_bottom(int(data[0])), (PROC_HEIGHT)), color=turbo(num+1)[int(data[0])])
+        gantt.broken_barh([(int(data[1]), execute_time)], (bar_bottom(int(data[0])), (PROC_HEIGHT)), color=turbo(num)[int(data[0])-1])
         
     # 공백 줄이기
     plt.tight_layout()
