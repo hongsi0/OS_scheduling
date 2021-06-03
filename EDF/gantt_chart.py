@@ -28,7 +28,7 @@ def scheduling_plot(result):
     num = int(num[0])
     
     # 랜덤 색상 팔레트 생성
-    colors = ['#000000']
+    colors = [''] # colors[0]은 사용하지 않음
     r = lambda: np.random.randint(0,255)
     for i in range(1, num+1):
         colors.append('#%02X%02X%02X' % (r(),r(),r()))
@@ -77,11 +77,9 @@ def scheduling_plot(result):
     # 각 프로세스마다의 바 출력 
     for i in data:
         data = i.split()
-        for j in range(1, num + 1) :
-            if ((int(data[0]) == j)):
-                execute_time = int(data[2]) - int(data[1])
-                gantt.broken_barh([(int(data[1]), execute_time)], (bar_bottom(j), (PROC_HEIGHT)), color=colors[j])
-
+        execute_time = int(data[2]) - int(data[1])
+        gantt.broken_barh([(int(data[1]), execute_time)], (bar_bottom(int(data[0])), (PROC_HEIGHT)), color=colors[int(data[0])])
+        
     # 공백 줄이기
     plt.tight_layout()
     
