@@ -229,10 +229,10 @@ int main(void){
                 fprintf(fp, "%d %d ", now->id, current_time);
                 // now 시작
             } else if(processes[i]->deadline < now->deadline) { /* 선점 */
-                now->remain_time = now->remain_time - (current_time - p_start_time);
-                push(now);
                 printf("TIME %5d\tPROCESS ID %3d\t FINISH\n", current_time, now->id);
                 fprintf(fp, "%d\n", current_time);
+                now->remain_time = now->remain_time - (current_time - p_start_time);
+                push(now);
                 printf("TIME %5d\tPROCESS ID %3d\t START\n", current_time, processes[i]->id);
                 fprintf(fp, "%d %d ", processes[i]->id, current_time);
                 // now 종료, processes[i] 시작
@@ -282,7 +282,7 @@ int main(void){
     printf("UTILIZATION(%%)  : %.3lf\n", utilization);
 
     /* response time, turnaround time, waiting time, idle time 검증 */
-    // process id 순으로 정렬 
+    // process id 순으로 정렬
     for (i = 0; i < n - 1; i++){
         for(int j = 0; j < n - (i + 1); j++){
             if(processes[j] -> id > processes[j+1] -> id){
