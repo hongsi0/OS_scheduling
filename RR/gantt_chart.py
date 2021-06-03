@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from bokeh.palettes import Turbo256, turbo
 
 # 바 크기 지정
 PROC_HEIGHT = 15
@@ -26,6 +27,12 @@ def scheduling_plot(result):
     # 프로세스 개수 num 변수에 저장
     num = data[0].split()
     num = int(num[0])
+    
+    # 랜덤 색상 팔레트 생성
+    colors = [''] # colors[0]은 사용하지 않음
+    r = lambda: np.random.randint(0,255)
+    for i in range(1, num+1):
+        colors.append('#%02X%02X%02X' % (r(),r(),r()))
 
     # 프로세스 개수 data 배열에서 삭제
     del data[0]
@@ -38,7 +45,7 @@ def scheduling_plot(result):
     endTime = int(tmp[2])
 
     # plot 생성, 프로세스 개수와 종료시간에 따라 크기 지정 및 label 설정     
-    fig, gantt = plt.subplots(figsize = (10, num * 1.5))
+    fig, gantt = plt.subplots(figsize = (endTime * 0.5, num * 1.5))
 
     gantt.set_xlim(0, endTime+1)
     gantt.set_ylim(0, ((PROC_HEIGHT * num) + (PROC_SPACING * (num + 1))))
@@ -71,11 +78,9 @@ def scheduling_plot(result):
     # 각 프로세스마다의 바 출력 
     for i in data:
         data = i.split()
-        for j in range(1, num + 1) :
-            if ((int(data[0]) == j)):
-                execute_time = int(data[2]) - int(data[1])
-                gantt.broken_barh([(int(data[1]), execute_time)], (bar_bottom(j), (PROC_HEIGHT)), color ='black')
-
+        execute_time = int(data[2]) - int(data[1])
+        gantt.broken_barh([(int(data[1]), execute_time)], (bar_bottom(int(data[0])), (PROC_HEIGHT)), color=turbo(num)[int(data[0])-1])
+        
     # 공백 줄이기
     plt.tight_layout()
     

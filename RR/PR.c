@@ -6,7 +6,7 @@
 #include <stdlib.h>
 
 #define MAX_PROCESS 100
-#define FILE_NAME "test2.txt"
+#define FILE_NAME "process.txt"
 
 int proc_num;   // 총 프로세스 갯수
 int curr_time = 0;  // 현재 running time
@@ -30,7 +30,7 @@ struct _process{
 // 도착 시간에 따른 정렬
 void sort(struct _process *proc, int total_proc) {
     struct _process temp;
-    for(int i = 0 ; i < total_proc ; i++) { // 
+    for(int i = 0 ; i < total_proc ; i++) { //
         for(int j = i + 1 ; j < total_proc ; j++) {
             if(proc[i].arrival_time > proc[j].arrival_time) { // 도착 시간이 작은 순으로 정렬
                 temp = proc[i];
@@ -135,7 +135,7 @@ void proc_burst_remain(struct _process *proc, int rq_index){
 int cal_rqnum_tbt(struct _process *proc, int __curr_time){
     int proc_count = 0;
     total_burst_time = 0;
-    
+
     for(int i=0; i<proc_num; i++){   // 도착 시간이 현재까지 실행 시간보다 작은 프로세스의 갯수를 count
         if(proc[i].arrival_time > __curr_time+0.1){
             break;
@@ -147,12 +147,13 @@ int cal_rqnum_tbt(struct _process *proc, int __curr_time){
     return proc_count;
 }
 
-// 각 프로세스의 process id / waiting time / turnaround time / response time 및 context switch / 총 runnign time / 
+// 각 프로세스의 process id / waiting time / turnaround time / response time 및 context switch / 총 runnign time /
 // average of waiting time / average of turnaround time / average of response time 출력
 void print_result(struct _process *proc){
-    int total_wt = 0;
-    int total_tat = 0;
-    int total_rpt = 0;
+    float total_wt = 0;
+    float total_tat = 0;
+    float total_rpt = 0;
+    // double utilization = (1- (idle_time/(current_time-1))) * 100;
 
     for(int i=0; i < proc_num; i++){
         total_wt = total_wt + proc[i].waiting_time;
@@ -160,21 +161,27 @@ void print_result(struct _process *proc){
         total_rpt = total_rpt + proc[i].response_time;
 
         if(i==0){
-            printf("\n\n-------------------------------------------------------------------------------\n");
-        }
-        printf("process_id: %d  |  ", proc[i].process_id);
-        printf("waiting time: %d  |  ", proc[i].waiting_time);
-        printf("turnaround time: %d  |  ", proc[i].turnaround_time);
-        printf("response time: %d\n", proc[i].response_time);
+            printf("\n\
++-------+--------+----------+-------+\n\
+|PROCESS|RESPONSE|TURNAROUND|WAITING|\n\
+|   ID  |  TIME  |   TIME   | TIME  |\n\
++-------+--------+----------+-------+\n");}
+        printf("|   %3d |", proc[i].process_id);
+        printf("  %5d |", proc[i].waiting_time);
+        printf("    %5d |", proc[i].turnaround_time);
+        printf(" %5d |\n", proc[i].response_time);
         if(i==proc_num-1){
-            printf("-------------------------------------------------------------------------------\n");
+            printf("+-------+--------+----------+-------+\n\n");
         }
     }
-    printf("Total Context Switch : %d\n", context_switch);
-    printf("Total Runtime : %d\n", curr_time);
-    printf("Average Waiting Time : %d\n", total_wt/proc_num);
-    printf("Average Turnaround Time : %d\n", total_tat/proc_num);
-    printf("Average Response Time : %d\n\n", total_rpt/proc_num);
+    printf("Total %d Processes\n", proc_num);
+    //printf("Total Context Switch : %d\n", context_switch);
+    printf("Total Runtime          : %d\n", curr_time);
+    // printf("Utilization            : %.3lf%%\n", utilization);
+    // printf("Idle Time              : %d\n", idle_time);
+    printf("Average Waiting Time   : %.3f\n", total_wt/proc_num);
+    printf("Average Turnaround Time: %.3f\n", total_tat/proc_num);
+    printf("Average Response Time  : %.3f\n\n", total_rpt/proc_num);
 }
 
 int main(){
@@ -191,11 +198,11 @@ int main(){
     int dupli_procn = proc_num; // while 조건에 들어갈 process 갯수
 
     int rq_proc = cal_rqnum_tbt(process, curr_time);
-    
+
     while(dupli_procn!=0){
-        printf("total burst time : %d\n", total_burst_time);
-        printf("TQ : %d\n", TQ);
-        printf("rq_proc : %d\n", rq_proc);
+        //printf("total burst time : %d\n", total_burst_time);
+        //printf("TQ : %d\n", TQ);
+        //printf("rq_proc : %d\n", rq_proc);
         check_procstart(process);
 
         for(int i=0; i<rq_proc; i++){

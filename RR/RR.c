@@ -6,7 +6,7 @@
 #include <stdlib.h>
 
 #define MAX_PROCESS 100
-#define FILE_NAME "test"
+#define FILE_NAME "process.txt"
 #define TQ 2
 
 int proc_num;
@@ -42,7 +42,7 @@ void sort(struct _process *proc, int total_proc) {
 }
 
 int input_data(struct _process *proc){
-    FILE *fd = fopen("process.txt", "r");
+    FILE *fd = fopen(FILE_NAME, "r");
     char data[255];
     char *pdata;
     int i = 0;
@@ -108,9 +108,9 @@ void proc_burst_remain(struct _process *proc){
 }
 
 void print_result(struct _process *proc){
-    int total_wt = 0;
-    int total_tat = 0;
-    int total_rpt = 0;
+    float total_wt = 0;
+    float total_tat = 0;
+    float total_rpt = 0;
 
     for(int i=0; i < proc_num; i++){
         total_wt = total_wt + proc[i].waiting_time;
@@ -118,21 +118,27 @@ void print_result(struct _process *proc){
         total_rpt = total_rpt + proc[i].response_time;
 
         if(i==0){
-            printf("\n\n-------------------------------------------------------------------------------\n");
-        }
-        printf("process_id: %d  |  ", proc[i].process_id);
-        printf("waiting time: %d  |  ", proc[i].waiting_time);
-        printf("turnaround time: %d  |  ", proc[i].turnaround_time);
-        printf("response time: %d\n", proc[i].response_time);
+            printf("\n\
++-------+--------+----------+-------+\n\
+|PROCESS|RESPONSE|TURNAROUND|WAITING|\n\
+|   ID  |  TIME  |   TIME   | TIME  |\n\
++-------+--------+----------+-------+\n");}
+        printf("|   %3d |", proc[i].process_id);
+        printf("  %5d |", proc[i].waiting_time);
+        printf("    %5d |", proc[i].turnaround_time);
+        printf(" %5d |\n", proc[i].response_time);
         if(i==proc_num-1){
-            printf("-------------------------------------------------------------------------------\n");
+            printf("+-------+--------+----------+-------+\n\n");
         }
     }
-    printf("Total Context Switch : %d\n", context_switch);
-    printf("Total Runtime : %d\n", start_time);
-    printf("Average Waiting Time : %d\n", total_wt/proc_num);
-    printf("Average Turnaround Time : %d\n", total_tat/proc_num);
-    printf("Average Response Time : %d\n\n", total_rpt/proc_num);
+    printf("Total %d Processes\n", proc_num);
+    //printf("Total Context Switch : %d\n", context_switch);
+    printf("Total Runtime          : %d\n", start_time);
+    // Utilization
+    // Idle Time
+    printf("Average Waiting Time   : %.3f\n", total_wt/proc_num);
+    printf("Average Turnaround Time: %.3f\n", total_tat/proc_num);
+    printf("Average Response Time  : %.3f\n\n", total_rpt/proc_num);
 }
 
 int main(){
@@ -145,7 +151,7 @@ int main(){
     sort(process, proc_num);
 
     int dupli_procn = proc_num; // while 조건에 들어갈 process 갯수
-    
+
     while(dupli_procn!=0){
         contswitch_count(process);
         check_procstart(process);

@@ -225,15 +225,15 @@ int main(void){
                     now->response_time = current_time - now->arrive_time;
                 }
                 isNowEmpty = false;
-                printf("TIME %5d\tPROCESS ID %3d\t START\n", current_time, now->id);
+                //printf("TIME %5d\tPROCESS ID %3d\t START\n", current_time, now->id);
                 fprintf(fp, "%d %d ", now->id, current_time);
                 // now 시작
             } else if(processes[i]->deadline < now->deadline) { /* 선점 */
-                printf("TIME %5d\tPROCESS ID %3d\t FINISH\n", current_time, now->id);
+                //printf("TIME %5d\tPROCESS ID %3d\t FINISH\n", current_time, now->id);
                 fprintf(fp, "%d\n", current_time);
                 now->remain_time = now->remain_time - (current_time - p_start_time);
                 push(now);
-                printf("TIME %5d\tPROCESS ID %3d\t START\n", current_time, processes[i]->id);
+                //printf("TIME %5d\tPROCESS ID %3d\t START\n", current_time, processes[i]->id);
                 fprintf(fp, "%d %d ", processes[i]->id, current_time);
                 // now 종료, processes[i] 시작
                 end(now, current_time);
@@ -250,7 +250,7 @@ int main(void){
 
         if(!isNowEmpty && now->remain_time <= current_time - p_start_time){ // now 프로세스가 끝남
             isNowEmpty = true;
-            printf("TIME %5d\tPROCESS ID %3d\t FINISH\n", current_time, now->id);
+            //printf("TIME %5d\tPROCESS ID %3d\t FINISH\n", current_time, now->id);
             fprintf(fp, "%d\n", current_time);
             // now 종료
             end(now, current_time);
@@ -265,7 +265,7 @@ int main(void){
                   now->response_time = current_time - now->arrive_time;
                 }
                 isNowEmpty = false;
-                printf("TIME %5d\tPROCESS ID %3d\t START\n", current_time, now->id);
+                //printf("TIME %5d\tPROCESS ID %3d\t START\n", current_time, now->id);
                 fprintf(fp, "%d %d ", now->id, current_time);
                 // now 시작
             } else if(i < n){ // 모든 프로세스가 끝났을 때 세어지는 것 방지
@@ -276,10 +276,8 @@ int main(void){
         current_time ++;
     }
 
-    printf("\n");
     /* utilization 구하기 */
     utilization = (1- (idle_time/(current_time-1))) * 100; //CPU utilization(%) 계산
-    printf("UTILIZATION(%%)  : %.3lf\n", utilization);
 
     /* response time, turnaround time, waiting time, idle time 검증 */
     // process id 순으로 정렬
@@ -294,28 +292,34 @@ int main(void){
     }
     printf("\n");
     float aver_response = 0, aver_turnaround = 0, aver_waiting = 0;
+    printf("+-------+--------+----------+-------+\n\
+|PROCESS|RESPONSE|TURNAROUND|WAITING|\n\
+|   ID  |  TIME  |   TIME   | TIME  |\n\
++-------+--------+----------+-------+\n");
     for(i = 0; i < n; i++){
-        printf("PROCESS ID:%3d | ", processes[i]->id);
-        printf("RESPONSE TIME:%5d | ", processes[i]->response_time);
-        printf("TURNAROUND TIME:%5d | ", processes[i]->turnaround_time);
-        printf("WAITING TIME:%5d\n", processes[i]->waiting_time);
+        printf("|   %3d |", processes[i]->id);
+        printf("  %5d |", processes[i]->response_time);
+        printf("    %5d |", processes[i]->turnaround_time);
+        printf(" %5d |\n", processes[i]->waiting_time);
 
         aver_response += processes[i]->response_time;
         aver_turnaround += processes[i]->turnaround_time;
         aver_waiting += processes[i]->waiting_time;
     }
+    printf("+-------+--------+----------+-------+\n\n");
 
     aver_response /= n;
     aver_turnaround /= n;
     aver_waiting /= n;
 
+    printf("Total %d Processes\n", n);
+    printf("Total Runtime          : %d\n", current_time - 1);
+    printf("Utilization            : %.3lf%%\n", utilization);
+    printf("Idle Time              : %d\n", idle_time);
+    printf("Average Waiting Time   : %.3f\n", aver_waiting);
+    printf("Average Turnaround Time: %.3f\n", aver_turnaround);
+    printf("Average Response Time  : %.3f\n", aver_response);
     printf("\n");
-    printf("TOTAL %d PROCESSES\n", n);
-    printf("IDLE TIME              : %d\n", idle_time);
-    printf("TOTAL RUNTIME          : %d\n", current_time - 1);
-    printf("AVERAGE WAITING TIME   : %.3f\n", aver_waiting);
-    printf("AVERAGE TURNAROUND TIME: %.3f\n", aver_turnaround);
-    printf("AVERAGE RESPONSE TIME  : %.3f\n", aver_response);
 
     /* free memory */
     for(i = 0; i < MAX; i++){
