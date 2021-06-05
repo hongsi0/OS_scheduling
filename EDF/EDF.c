@@ -14,7 +14,7 @@ typedef struct Process {
     int response_time;       // 응답 시간
     int turnaround_time;     // 소요 시간
     int waiting_time;        // 대기 시간
-    bool deadline_satisfied; // false
+    bool deadline_satisfaction; // false
 
 } Process;
 
@@ -29,7 +29,7 @@ void setProcess(Process *p, int id, int arrive_time, int burst_time, int deadlin
     p->response_time = -1;
     p->turnaround_time = -1;
     p->waiting_time = -1;
-    p->deadline_satisfied = false;
+    p->deadline_satisfaction = false;
 }
 
 typedef struct priority_queue {
@@ -121,7 +121,7 @@ void end(Process *now, int current_time) {
     // 프로세스가 종료될 경우, 종료된 시간을 인자로 받아
     // deadline 만족여부, turnaround time, waiting time 계산
     if(current_time <= now->deadline){
-        now->deadline_satisfied = true;
+        now->deadline_satisfaction = true;
     }
     now->turnaround_time = current_time - now->arrive_time;
     now->waiting_time = now->turnaround_time - now->burst_time;
@@ -292,21 +292,27 @@ int main(void){
     }
     printf("\n");
     float aver_response = 0, aver_turnaround = 0, aver_waiting = 0;
-    printf("+-------+--------+----------+-------+\n\
-|PROCESS|RESPONSE|TURNAROUND|WAITING|\n\
-|   ID  |  TIME  |   TIME   | TIME  |\n\
-+-------+--------+----------+-------+\n");
+    printf("\
++-------+--------+----------+-------+------------+\n\
+|PROCESS|RESPONSE|TURNAROUND|WAITING|  DEADLINE  |\n\
+|   ID  |  TIME  |   TIME   | TIME  |SATISFACTION|\n\
++-------+--------+----------+-------+------------+\n");
     for(i = 0; i < n; i++){
-        printf("|   %3d |", processes[i]->id);
+        printf("|  %3d  |", processes[i]->id);
         printf("  %5d |", processes[i]->response_time);
         printf("    %5d |", processes[i]->turnaround_time);
-        printf(" %5d |\n", processes[i]->waiting_time);
+        printf(" %5d |", processes[i]->waiting_time);
+        if(processes[i]->deadline_satisfaction == true){
+            printf("      O     |\n");
+        } else {
+            printf("      X     |\n");
+        }
 
         aver_response += processes[i]->response_time;
         aver_turnaround += processes[i]->turnaround_time;
         aver_waiting += processes[i]->waiting_time;
     }
-    printf("+-------+--------+----------+-------+\n\n");
+    printf("+-------+--------+----------+-------+------------+\n\n");
 
     aver_response /= n;
     aver_turnaround /= n;
