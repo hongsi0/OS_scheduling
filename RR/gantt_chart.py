@@ -45,7 +45,7 @@ def scheduling_plot(result):
     endTime = int(tmp[2])
 
     # plot 생성, 프로세스 개수와 종료시간에 따라 크기 지정 및 label 설정     
-    fig, gantt = plt.subplots(figsize = (endTime * 0.5, num * 1.5))
+    fig, gantt = plt.subplots(figsize = (endTime * 0.3, num * 1.5))
 
     gantt.set_xlim(0, endTime+1)
     gantt.set_ylim(0, ((PROC_HEIGHT * num) + (PROC_SPACING * (num + 1))))

@@ -58,6 +58,20 @@ void sort_bt(struct _process *proc, int rq_proc) {
     }
 }
 
+void sort_id(struct _process *proc, int total_proc) {
+    struct _process temp;
+    for(int i = 0 ; i < total_proc ; i++) {
+        for(int j = i + 1 ; j < total_proc ; j++) {
+            if(proc[i].process_id > proc[j].process_id) {
+                temp = proc[i];
+                proc[i] = proc[j];
+                proc[j] = temp;
+            }
+        }
+    }
+    return;
+}
+
 // 프로세스 데이터 입력
 int input_data(struct _process *proc){
     FILE *fd = fopen(FILE_NAME, "r"); // 텍스트 파일 open
@@ -68,15 +82,12 @@ int input_data(struct _process *proc){
     while(!feof(fd)){   // 파일의 마지막이 아닐 경우 while문 조건 부합
         fgets(data, sizeof(data), fd);  // 텍스트 파일의 한줄을 data에 저장
         pdata = strtok(data, " ");      // data에 저장된 값을 첫 번째 띄어쓰기가 나오기 전까지의 단어를 pdata 포인터가 가리킴
-        for(int j = 0; j < 3; j++){     // process id, arrival time, burst time을 받기 때문에 3번의 반복을 통해 해당 값들을 가져옴
+        for(int j = 0; j < 2; j++){     // process id, arrival time, burst time을 받기 때문에 3번의 반복을 통해 해당 값들을 가져옴
+            proc[i].process_id = i+1;
             if(j==0){
-                proc[i].process_id = atoi(pdata);
-            }
-            else if(j==1){
                 proc[i].arrival_time = atoi(pdata);
                 proc[i].r_at = atoi(pdata);
-            }
-            else{
+            }else{
                 proc[i].burst_time = atoi(pdata);
                 proc[i].remain_time = atoi(pdata);
                 total_burst_time = total_burst_time + atoi(pdata);  // 초기 time quantum을 모든 프로세스의 burst time 평균으로 설정해 주기 위함
@@ -180,7 +191,7 @@ void print_result(struct _process *proc){
     //printf("Total Context Switch : %d\n", context_switch);
     printf("Total Runtime          : %d\n", curr_time);
     printf("Utilization            : %.3lf%%\n", utilization);
-    printf("Idle Time              : %d\n", (int)idle_time);
+    printf("Idle Time              : %.3f\n", idle_time);
     printf("Average Waiting Time   : %.3f\n", total_wt/proc_num);
     printf("Average Turnaround Time: %.3f\n", total_tat/proc_num);
     printf("Average Response Time  : %.3f\n\n", total_rpt/proc_num);
@@ -238,6 +249,7 @@ int main(){
 
     idle_time = curr_time - idle_time;
     utilization = (1- (idle_time/curr_time)) * 100;
+    sort_id(process, proc_num);
     print_result(process);
 
     return 0;

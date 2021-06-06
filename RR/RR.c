@@ -7,7 +7,7 @@
 
 #define MAX_PROCESS 100
 #define FILE_NAME "process.txt"
-#define TQ 2
+#define TQ 1
 
 int proc_num;
 int curr_time = 0;
@@ -43,6 +43,20 @@ void sort(struct _process *proc, int total_proc) {
     return;
 }
 
+void sort_id(struct _process *proc, int total_proc) {
+    struct _process temp;
+    for(int i = 0 ; i < total_proc ; i++) {
+        for(int j = i + 1 ; j < total_proc ; j++) {
+            if(proc[i].process_id > proc[j].process_id) {
+                temp = proc[i];
+                proc[i] = proc[j];
+                proc[j] = temp;
+            }
+        }
+    }
+    return;
+}
+
 int input_data(struct _process *proc){
     FILE *fd = fopen(FILE_NAME, "r");
     char data[255];
@@ -52,11 +66,9 @@ int input_data(struct _process *proc){
     while(!feof(fd)){
         fgets(data, sizeof(data), fd);
         pdata = strtok(data, " ");
-        for(int j = 0; j < 3; j++){
+        for(int j = 0; j < 2; j++){
+            proc[i].process_id = i + 1;
             if(j==0){
-                proc[i].process_id = atoi(pdata);
-            }
-            else if(j==1){
                 proc[i].arrival_time = atoi(pdata);
                 proc[i].r_at = atoi(pdata);
             }
@@ -138,7 +150,7 @@ void print_result(struct _process *proc){
     //printf("Total Context Switch : %d\n", context_switch);
     printf("Total Runtime          : %d\n", curr_time);
     printf("Utilization            : %.3lf%%\n", utilization);
-    printf("Idle Time              : %d\n", (int)idle_time);
+    printf("Idle Time              : %.3f\n", idle_time);
     printf("Average Waiting Time   : %.3f\n", total_wt/proc_num);
     printf("Average Turnaround Time: %.3f\n", total_tat/proc_num);
     printf("Average Response Time  : %.3f\n\n", total_rpt/proc_num);
@@ -180,6 +192,7 @@ int main(){
 
     idle_time = curr_time - total_run_time;
     utilization = (1- (idle_time/curr_time)) * 100;
+    sort_id(process, proc_num);
     print_result(process);
 
     return 0;
