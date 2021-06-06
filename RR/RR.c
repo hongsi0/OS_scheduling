@@ -14,6 +14,8 @@ int curr_time = 0;
 int context_switch = 0;
 int prev_proc=-1;
 int total_run_time = 0;
+double idle_time = 0;
+double utilization;
 
 
 struct _process{
@@ -135,8 +137,8 @@ void print_result(struct _process *proc){
     printf("Total %d Processes\n", proc_num);
     //printf("Total Context Switch : %d\n", context_switch);
     printf("Total Runtime          : %d\n", curr_time);
-    // printf("Utilization            : %.3lf%%\n", utilization);
-    // printf("Idle Time              : %d\n", idle_time);
+    printf("Utilization            : %.3lf%%\n", utilization);
+    printf("Idle Time              : %d\n", (int)idle_time);
     printf("Average Waiting Time   : %.3f\n", total_wt/proc_num);
     printf("Average Turnaround Time: %.3f\n", total_tat/proc_num);
     printf("Average Response Time  : %.3f\n\n", total_rpt/proc_num);
@@ -176,6 +178,8 @@ int main(){
 
     fclose(fp);
 
+    idle_time = curr_time - total_run_time;
+    utilization = (1- (idle_time/curr_time)) * 100;
     print_result(process);
 
     return 0;

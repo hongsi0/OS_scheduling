@@ -14,6 +14,8 @@ int context_switch = 1; // context switch 횟수
 int prev_proc=-1;   // 이전에 실행되었던 프로세스의 process id
 int total_burst_time = 0;   // 총 burst time, ready queue에 있는 프로세스의 burst time을 저장시키기 위함
 int TQ = 0; // time quantum
+double idle_time = 0;
+double utilization;
 
 
 struct _process{
@@ -177,8 +179,8 @@ void print_result(struct _process *proc){
     printf("Total %d Processes\n", proc_num);
     //printf("Total Context Switch : %d\n", context_switch);
     printf("Total Runtime          : %d\n", curr_time);
-    // printf("Utilization            : %.3lf%%\n", utilization);
-    // printf("Idle Time              : %d\n", idle_time);
+    printf("Utilization            : %.3lf%%\n", utilization);
+    printf("Idle Time              : %d\n", (int)idle_time);
     printf("Average Waiting Time   : %.3f\n", total_wt/proc_num);
     printf("Average Turnaround Time: %.3f\n", total_tat/proc_num);
     printf("Average Response Time  : %.3f\n\n", total_rpt/proc_num);
@@ -189,6 +191,7 @@ int main(){
     FILE *fp = fopen("result.txt", "w"); // for gantt chart
 
     proc_num = input_data(process);
+    idle_time = total_burst_time;
     fprintf(fp, "%d\n", proc_num); // write proc_num to result.txt
 
     sort(process, proc_num);
@@ -233,6 +236,8 @@ int main(){
 
     fclose(fp);
 
+    idle_time = curr_time - idle_time;
+    utilization = (1- (idle_time/curr_time)) * 100;
     print_result(process);
 
     return 0;
